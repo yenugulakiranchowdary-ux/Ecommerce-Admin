@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexMart — Premium E-Commerce</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d14; --bg2: #13131e; --bg3: #1a1a28; --card: #161622;
+            --border: rgba(255,255,255,0.08); --accent: #7c5cfc;
+            --t1: #f0eeff; --t2: #9490a8; --t3: #4a4660;
+            --shadow: 0 8px 32px rgba(0,0,0,0.5); --r: 16px;
+            --font-h: 'Syne', sans-serif; --font-b: 'Outfit', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8f9ff; --bg2: #f0f2ff; --bg3: #e5e9ff; --card: #ffffff;
+            --border: rgba(0,0,0,0.06); --accent: #6d48e5;
+            --t1: #1a1730; --t2: #5a5680; --t3: #9895b0;
+            --shadow: 0 8px 32px rgba(109,72,229,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-b); background: var(--bg); color: var(--t1); transition: 0.3s; line-height: 1.6; }
+        
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 24px; }
+        .flex { display: flex; align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .hidden { display: none !important; }
+
+       
+        header { position: sticky; top: 0; z-index: 1000; height: 75px; background: rgba(13, 13, 20, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); }
+        .logo { font-family: var(--font-h); font-size: 1.6rem; font-weight: 800; cursor: pointer; color: var(--t1); text-decoration: none; }
+        .logo span { color: var(--accent); }
+        
+        .nav-link { padding: 10px 20px; border-radius: 12px; font-weight: 600; color: var(--t2); cursor: pointer; transition: 0.2s; }
+        .nav-link.active { color: var(--t1); background: var(--bg3); }
+
+        .btn { padding: 10px 20px; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: var(--bg3); color: var(--t1); border: 1px solid var(--border); }
+
+       
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; padding: 40px 0; }
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; transition: 0.4s; position: relative; }
+        .product-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: var(--shadow); }
+        
+        .img-container { width: 100%; height: 220px; border-radius: 12px; background: var(--bg3); margin-bottom: 15px; overflow: hidden; position: relative; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s ease; }
+        .img-container img.loaded { opacity: 1; }
+        
+   
+        .shimmer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        .cat-tag { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--accent); letter-spacing: 1px; margin-bottom: 5px; }
+        .price { font-size: 1.3rem; font-weight: 800; margin-top: 10px; }
+
+     
+        .admin-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 75px); }
+        .sidebar { background: var(--bg2); padding: 30px 20px; border-right: 1px solid var(--border); }
+        .side-item { padding: 14px 18px; border-radius: 12px; color: var(--t2); cursor: pointer; margin-bottom: 5px; font-weight: 600; }
+        .side-item.active { background: var(--accent); color: white; }
+        .admin-content { padding: 40px; }
+
+ 
+        .card { background: var(--card); border: 1px solid var(--border); padding: 30px; border-radius: var(--r); max-width: 600px; }
+        input, select { width: 100%; padding: 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; color: var(--t1); margin: 10px 0 20px 0; outline: none; }
+        input:focus { border-color: var(--accent); }
+
+    
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1100; backdrop-filter: blur(5px); }
+        .drawer { position: fixed; right: -450px; top: 0; width: 450px; height: 100%; background: var(--bg2); z-index: 1200; transition: 0.4s; padding: 30px; display: flex; flex-direction: column; }
+        .drawer.open { right: 0; }
+
+  
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid var(--border); color: var(--t2); font-size: 0.9rem; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); }
+        
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 12px 30px; border-radius: 50px; z-index: 9999; display: none; font-weight: 600; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body>
+
+    <div id="toast">Item added to cart!</div>
+
+    <header>
+        <div class="container flex justify-between" style="height: 100%;">
+            <div class="logo" onclick="ui.view('home')">NEX<span>MART</span></div>
+            <nav class="flex" style="gap: 10px;">
+                <div class="nav-link active" data-v="home" onclick="ui.view('home')">Shop</div>
+                <div class="nav-link" data-v="admin" onclick="ui.view('admin')">Admin</div>
+            </nav>
+            <div class="flex" style="gap: 15px;">
+                <button class="btn-secondary" onclick="ui.toggleTheme()">🌓</button>
+                <button class="btn-primary" onclick="ui.toggleCart()" style="position:relative">
+                    🛒 Cart <span id="cart-count" style="background:white; color:var(--accent); padding:2px 7px; border-radius:10px; font-size:0.7rem; margin-left:5px;">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="view-home" class="container">
+        <h1 style="font-family: var(--font-h); margin-top: 40px; font-size: 2.5rem;">Explore <span>Products</span></h1>
+        <div id="product-list" class="product-grid"></div>
+    </div>
+
+    <div id="view-admin" class="admin-layout hidden">
+        <aside class="sidebar">
+            <div class="side-item active" onclick="ui.tab('overview', this)">Overview</div>
+            <div class="side-item" onclick="ui.tab('add', this)">Add Product</div>
+            <div class="side-item" onclick="ui.tab('orders', this)">Orders</div>
+        </aside>
+        <main class="admin-content">
+            <div id="tab-overview">
+                <h2 style="font-family: var(--font-h); font-size: 2rem; margin-bottom: 30px;">System Overview</h2>
+                <div class="flex" style="gap: 20px;">
+                    <div class="card" style="flex:1"><h4>Revenue</h4><h2 id="stat-rev">$0.00</h2></div>
+                    <div class="card" style="flex:1"><h4>Orders</h4><h2 id="stat-orders">0</h2></div>
+                </div>
+            </div>
+
+            <div id="tab-add" class="hidden">
+                <h2 style="font-family: var(--font-h); font-size: 2rem; margin-bottom: 30px;">Add New Product</h2>
+                <div class="card">
+                    <label>Product Name</label>
+                    <input type="text" id="p-name" placeholder="e.g. iPhone 15 Pro">
+                    <label>Price ($)</label>
+                    <input type="number" id="p-price" placeholder="999.99">
+                    <label>Category</label>
+                    <select id="p-cat">
+                        <option>Mobiles</option>
+                        <option>Laptops</option>
+                        <option>Cameras</option>
+                        <option>Audio</option>
+                        <option>Wearables</option>
+                    </select>
+                    <label>Image URL (Optional)</label>
+                    <input type="text" id="p-img-url" placeholder="https://example.com/image.jpg">
+                    <button class="btn btn-primary" style="width:100%" onclick="app.addProduct()">List Product</button>
+                </div>
+            </div>
+
+            <div id="tab-orders" class="hidden">
+                <h2 style="font-family: var(--font-h); font-size: 2rem; margin-bottom: 20px;">Recent Orders</h2>
+                <div class="card" style="max-width: 100%;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="order-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="ui.toggleCart()"></div>
+    <div class="drawer" id="cart-drawer">
+        <h2 style="margin-bottom: 20px;">Your Cart</h2>
+        <div id="cart-items" style="flex:1; overflow-y:auto;"></div>
+        <div style="padding-top:20px; border-top:1px solid var(--border)">
+            <div class="flex justify-between" style="margin-bottom:20px;">
+                <span>Total Amount:</span><b id="cart-total">$0.00</b>
+            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center" onclick="app.checkout()">Place Order</button>
+        </div>
+    </div>
+
+    <script>
+        const IMAGES = {
+            Audio: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+            Wearables: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
+            Laptops: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&q=80",
+            Mobiles: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80",
+            Cameras: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&q=80"
+        };
+
+        const app = {
+            products: JSON.parse(localStorage.getItem('nx_prod')) || [
+                { id: 1, name: "Neural Headset", price: 299.99, cat: "Audio", img: IMAGES.Audio },
+                { id: 2, name: "Nano Watch", price: 199.99, cat: "Wearables", img: IMAGES.Wearables },
+                { id: 3, name: "Prism Laptop", price: 1299.99, cat: "Laptops", img: IMAGES.Laptops }
+            ],
+            cart: [],
+            orders: JSON.parse(localStorage.getItem('nx_ord')) || [],
+
+            init() {
+                this.renderProducts();
+                this.renderOrders();
+                this.updateStats();
+            },
+
+            renderProducts() {
+                const list = document.getElementById('product-list');
+                list.innerHTML = this.products.map(p => `
+                    <div class="product-card">
+                        <div class="img-container">
+                            <div class="shimmer"></div>
+                            <img src="${p.img}" onload="this.classList.add('loaded')" onerror="this.src='https://images.unsplash.com/photo-1581235720704-06d3acfc1366?w=500&q=80'">
+                        </div>
+                        <div class="cat-tag">${p.cat}</div>
+                        <h3>${p.name}</h3>
+                        <div class="price">$${p.price.toFixed(2)}</div>
+                        <button class="btn btn-primary" style="margin-top:15px; width:100%; justify-content:center" onclick="app.addToCart(${p.id})">Add to Cart</button>
+                    </div>
+                `).join('');
+            },
+
+            renderOrders() {
+                const list = document.getElementById('order-list');
+                if (this.orders.length === 0) {
+                    list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--t3)">No orders yet</td></tr>';
+                    return;
+                }
+                list.innerHTML = this.orders.map(o => `
+                    <tr>
+                        <td>#${o.id.toString().slice(-6)}</td>
+                        <td>${o.date || 'Today'}</td>
+                        <td>${o.items} items</td>
+                        <td><b>$${o.total.toFixed(2)}</b></td>
+                        <td><span style="color:#10b981; font-weight:600">Completed</span></td>
+                    </tr>
+                `).reverse().join('');
+            },
+
+            addToCart(id) {
+                const p = this.products.find(x => x.id === id);
+                this.cart.push(p);
+                this.updateCart();
+                ui.toast(`Added ${p.name} to cart`);
+            },
+
+            updateCart() {
+                const items = document.getElementById('cart-items');
+                document.getElementById('cart-count').innerText = this.cart.length;
+                items.innerHTML = this.cart.map((p, i) => `
+                    <div class="flex justify-between" style="padding:10px 0; border-bottom:1px solid var(--border)">
+                        <div>
+                            <b>${p.name}</b><br><small>$${p.price}</small>
+                        </div>
+                        <button onclick="app.removeCart(${i})" style="color:red; background:none; border:none; cursor:pointer">Remove</button>
+                    </div>
+                `).join('');
+                const total = this.cart.reduce((s, x) => s + x.price, 0);
+                document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+            },
+
+            removeCart(i) {
+                this.cart.splice(i, 1);
+                this.updateCart();
+            },
+
+            addProduct() {
+                const name = document.getElementById('p-name').value;
+                const price = parseFloat(document.getElementById('p-price').value);
+                const cat = document.getElementById('p-cat').value;
+                const customImg = document.getElementById('p-img-url').value;
+                
+                if(!name || !price) return ui.toast("Please fill name and price");
+
+                const newP = { 
+                    id: Date.now(), 
+                    name, 
+                    price, 
+                    cat, 
+                    img: customImg || IMAGES[cat] || IMAGES.Audio 
+                };
+                
+                this.products.push(newP);
+                localStorage.setItem('nx_prod', JSON.stringify(this.products));
+                this.renderProducts();
+                
+           
+                document.getElementById('p-name').value = '';
+                document.getElementById('p-price').value = '';
+                document.getElementById('p-img-url').value = '';
+                
+                ui.toast("Product added!");
+                ui.tab('overview', document.querySelectorAll('.side-item')[0]);
+            },
+
+            checkout() {
+                if(this.cart.length === 0) return ui.toast("Cart is empty");
+                const total = this.cart.reduce((s, x) => s + x.price, 0);
+                const order = { 
+                    id: Date.now(), 
+                    total, 
+                    items: this.cart.length,
+                    date: new Date().toLocaleDateString()
+                };
+                
+                this.orders.push(order);
+                localStorage.setItem('nx_ord', JSON.stringify(this.orders));
+                
+                this.cart = [];
+                this.updateCart();
+                this.renderOrders();
+                this.updateStats();
+                ui.toggleCart();
+                ui.toast("Order placed successfully!");
+            },
+
+            updateStats() {
+                const total = this.orders.reduce((s, x) => s + x.total, 0);
+                document.getElementById('stat-rev').innerText = `$${total.toFixed(2)}`;
+                document.getElementById('stat-orders').innerText = this.orders.length;
+            }
+        };
+
+        const ui = {
+            view(v) {
+                document.getElementById('view-home').classList.toggle('hidden', v !== 'home');
+                document.getElementById('view-admin').classList.toggle('hidden', v !== 'admin');
+                document.querySelectorAll('.nav-link').forEach(n => n.classList.toggle('active', n.dataset.v === v));
+                if (v === 'admin') app.renderOrders(); 
+            },
+            tab(t, el) {
+                document.getElementById('tab-overview').classList.add('hidden');
+                document.getElementById('tab-add').classList.add('hidden');
+                document.getElementById('tab-orders').classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('hidden');
+                document.querySelectorAll('.side-item').forEach(s => s.classList.remove('active'));
+                el.classList.add('active');
+                if (t === 'orders') app.renderOrders();
+            },
+            toggleCart() {
+                document.getElementById('cart-drawer').classList.toggle('open');
+                document.getElementById('overlay').style.display = 
+                    document.getElementById('cart-drawer').classList.contains('open') ? 'block' : 'none';
+            },
+            toggleTheme() {
+                const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            },
+            toast(m) {
+                const t = document.getElementById('toast');
+                t.innerText = m;
+                t.style.display = 'block';
+                setTimeout(() => t.style.display = 'none', 3000);
+            }
+        };
+
+        app.init();
+    </script>
+</body>
+</html>
